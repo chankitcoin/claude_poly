@@ -18,11 +18,12 @@ FILES=(
 cd "$(dirname "$0")/.."
 mkdir -p data
 
+# Download through the API asset URLs: works for public and private repos alike.
+auth=()
 if [ -n "${GH_TOKEN:-}" ]; then
-  # Private repo: resolve each asset's API URL, then download it with the token.
-  release_json="$(curl -fsSL -H "Authorization: Bearer $GH_TOKEN" \
-    "https://api.github.com/repos/$REPO/releases/tags/$TAG")"
+  auth=(-H "Authorization: Bearer $GH_TOKEN")
 fi
+release_json="$(curl -fsSL "${auth[@]}" "https://api.github.com/repos/$REPO/releases/tags/$TAG")"
 
 for f in "${FILES[@]}"; do
   if [ -s "data/$f" ]; then
@@ -30,14 +31,8 @@ for f in "${FILES[@]}"; do
     continue
   fi
   echo "downloading $f"
-  if [ -n "${GH_TOKEN:-}" ]; then
-    url="$(printf '%s' "$release_json" | python3 -c "import json,sys; print(next(a['url'] for a in json.load(sys.stdin)['assets'] if a['name']=='$f'))")"
-    curl -fL --retry 3 -o "data/$f.part" \
-      -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/octet-stream" "$url"
-  else
-    curl -fL --retry 3 -o "data/$f.part" \
-      "https://github.com/$REPO/releases/download/$TAG/$f"
-  fi
+  url="$(printf '%s' "$release_json" | python3 -c "import json,sys; print(next(a['url'] for a in json.load(sys.stdin)['assets'] if a['name']=='$f'))")"
+  curl -fL --retry 3 -o "data/$f.part" "${auth[@]}" -H "Accept: application/octet-stream" "$url"
   mv "data/$f.part" "data/$f"
 done
 
