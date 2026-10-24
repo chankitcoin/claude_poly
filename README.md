@@ -11,6 +11,21 @@ Tick data for Polymarket "Bitcoin Up or Down – 5m" markets.
 DATA_REPO=chankitcoin/claude_poly bash scripts/fetch_data.sh
 ```
 
+### Claude Code cloud sessions
+
+The cloud environment's setup script downloads the datasets once to `/opt/claude_poly_data` (cached with the environment):
+
+```bash
+#!/bin/bash
+set -euo pipefail
+curl -fsSL https://raw.githubusercontent.com/chankitcoin/claude_poly/main/scripts/fetch_data.sh \
+  | DATA_DIR=/opt/claude_poly_data bash
+```
+
+A SessionStart hook (`.claude/settings.json` → `scripts/link_data.sh`) then links `data/` to that folder, so the same `data/...` paths work locally and in the cloud.
+
+### Reading the data
+
 Read the compressed files directly, no need to unzip:
 
 ```python
