@@ -8,7 +8,7 @@ Tick data for Polymarket "Bitcoin Up or Down – 5m" markets.
 - Full datasets (~9.5 GB raw, gzip-compressed) are attached to the GitHub Release `data-v1`, not committed to git. Fetch them into `data/` with:
 
 ```bash
-DATA_REPO=owner/claude_poly bash scripts/fetch_data.sh
+DATA_REPO=chankitcoin/claude_poly bash scripts/fetch_data.sh
 ```
 
 Read the compressed files directly, no need to unzip:
